@@ -32,12 +32,10 @@
 	var module = angular.module( "ng-i18n-node", [] );
 
 	module.factory( "httpInterceptor", ["$log", "$q", function( $log, $q ) {
-		$log.debug( "$log is here to show you that this is a regular factory with injection" );
-
 		var httpInterceptor = {
 			request       : function( config ) {
 				if( config.url.match( /^\/i18n\// ) ) {
-					$log.info( "Intercepting /i18n/ request..." );
+					$log.debug( "Intercepting /i18n/ request..." );
 					config.i18nRequest = true;
 
 					var isRequestForLiteral = config.url.match( /^\/i18n\/\w+\/\w+/ );
@@ -56,15 +54,13 @@
 					}
 
 					config.config = config;
-					$log.debug( config );
 					return config;
 				}
 				return config;
 			},
 			responseError : function( rejection ) {
 				if( rejection.i18nRequest ) {
-					$log.info( "Handling rejected /i18n/ interception..." );
-					$log.debug( rejection );
+					$log.debug( "Handling rejected /i18n/ interception..." );
 
 					var dataToReturn = "";
 					var isRequestForLiteral = rejection.url.match( /^\/i18n\/\w+\/\w+/ );
@@ -72,7 +68,14 @@
 						var literalMatch = /^\/i18n\/\w+\/([^\/]+)/.exec( rejection.url );
 						var requestedLiteral = literalMatch[ 1 ];
 						var readableLiteral = decodeURIComponent( requestedLiteral );
+
 						dataToReturn = readableLiteral;
+
+						httpInterceptor.untranslated = httpInterceptor.untranslated || {};
+						httpInterceptor.untranslated[ readableLiteral ] = readableLiteral;
+						httpInterceptor.flushUntranslated();
+						$log.warn( "UNTRANSLATED LITERAL", readableLiteral );
+
 					} else {
 						// Requests for locale packages should have been handled by "request" interceptor.
 						dataToReturn = {};
@@ -87,6 +90,10 @@
 					};
 				}
 				return $q.reject( rejection );
+			},
+
+			flushUntranslated : function(){
+				$log.info( httpInterceptor.untranslated );
 			}
 		};
 
