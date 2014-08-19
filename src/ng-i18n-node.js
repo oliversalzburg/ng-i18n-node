@@ -29,5 +29,71 @@
 (function() {
 	"use strict";
 
+	var module = angular.module( "ng-i18n-node", [] );
 
+	module.factory( "httpInterceptor", ["$log", "$q", function( $log, $q ) {
+		$log.debug( "$log is here to show you that this is a regular factory with injection" );
+
+		var httpInterceptor = {
+			request       : function( config ) {
+				if( config.url.match( /^\/i18n\// ) ) {
+					$log.info( "Intercepting /i18n/ request..." );
+					config.i18nRequest = true;
+
+					var isRequestForLiteral = config.url.match( /^\/i18n\/\w+\/\w+/ );
+
+					if( isRequestForLiteral ) {
+						var literalMatch = /^\/i18n\/\w+\/([^\/]+)/.exec( config.url );
+						var requestedLiteral = literalMatch[ 1 ];
+						var readableLiteral = decodeURIComponent( requestedLiteral );
+						config.i18nLiteral = readableLiteral;
+						return $q.reject( config );
+
+					} else {
+						var localeMatch = /^\/i18n\/([^\/]+)/.exec( config.url );
+						var locale = localeMatch[ 1 ];
+						config.url = "i18n/" + locale + ".json";
+					}
+
+					config.config = config;
+					$log.debug( config );
+					return config;
+				}
+				return config;
+			},
+			responseError : function( rejection ) {
+				if( rejection.i18nRequest ) {
+					$log.info( "Handling rejected /i18n/ interception..." );
+					$log.debug( rejection );
+
+					var dataToReturn = "";
+					var isRequestForLiteral = rejection.url.match( /^\/i18n\/\w+\/\w+/ );
+					if( isRequestForLiteral ) {
+						var literalMatch = /^\/i18n\/\w+\/([^\/]+)/.exec( rejection.url );
+						var requestedLiteral = literalMatch[ 1 ];
+						var readableLiteral = decodeURIComponent( requestedLiteral );
+						dataToReturn = readableLiteral;
+					} else {
+						// Requests for locale packages should have been handled by "request" interceptor.
+						dataToReturn = {};
+					}
+
+					return {
+						data       : dataToReturn,
+						status     : 200,
+						headers    : null,
+						config     : rejection.config,
+						statusText : "OK"
+					};
+				}
+				return $q.reject( rejection );
+			}
+		};
+
+		return httpInterceptor;
+	}] );
+
+	module.config( ["$httpProvider", function( $httpProvider ) {
+		$httpProvider.interceptors.push( "httpInterceptor" );
+	}] );
 }());
