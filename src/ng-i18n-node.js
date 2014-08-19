@@ -93,7 +93,7 @@
 			},
 
 			flushUntranslated : function(){
-				$log.info( httpInterceptor.untranslated );
+				$log.info( JSON.stringify( httpInterceptor.untranslated ) );
 			}
 		};
 
