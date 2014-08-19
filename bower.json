@@ -1,0 +1,21 @@
+{
+  "name": "ng-i18n-node",
+  "version": "0.0.0",
+  "authors": [
+    "Oliver Salzburg <oliver.salzburg@gmail.com>"
+  ],
+  "keywords": [
+    "i18n-node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "www/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+  }
+}
