@@ -89,7 +89,7 @@
 						statusText : "OK"
 					};
 				}
-				return $q.reject( rejection );
+				return rejection;
 			},
 
 			flushUntranslated : function(){
