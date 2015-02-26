@@ -1,6 +1,6 @@
 {
   "name": "ng-i18n-node",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Use i18n-node-angular without i18n-node",
   "main": "src/ng-i18n-node.js",
   "scripts": {
