@@ -89,6 +89,8 @@
 						statusText : "OK"
 					};
 				}
+				// We MUST use $q.reject here, otherwise the intercepted response will later be treated as successful.
+				// This affects ALL requests made through $http!
 				return $q.reject( rejection );
 			},
 
